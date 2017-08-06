@@ -22,6 +22,9 @@ import (
 	"path/filepath"
 )
 
+// helper version
+var version = [3]byte{0, 0, 3}
+
 type Config struct {
 	Name      string // what helper is to be named
 	Owner     string // who helper knows as its owner
@@ -35,8 +38,7 @@ type Config struct {
 
 var DefaultResources = map[string]string{
 	"google": "https://encrypted.google.com/search?q=%s",
-	//"ddg":    "https://api.duckduckgo.com/?q=%s&format=json&pretty=1",
-	"ddg": "https://duckduckgo.com/lite?q=%s",
+	"ddg":    "https://duckduckgo.com/lite?q=%s",
 }
 
 var DefaultConfig = &Config{
@@ -51,10 +53,8 @@ func init() {
 	// remove log flags
 	log.SetFlags(0)
 	log.SetPrefix("")
+	log.Println(versionString())
 }
-
-// helper version
-var version = [3]byte{0, 0, 2}
 
 // stringer for version
 func versionString() string {
@@ -70,7 +70,7 @@ func main() {
 		config.OpenLinks = false
 	}
 	command := getcommand()
-	if err := config.RunCommand(command); err != nil {
+	if err := config.Run(command); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -82,15 +82,15 @@ func readconfig() *Config {
 		log.Fatal(err)
 	}
 
+	// configdir /home/user/.config/helper/
 	configdir := filepath.Join(user.HomeDir, ".config", "helper")
 	err = os.MkdirAll(configdir, 0700)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(versionString())
+	// configfile /home/user/.config/helper/config.json
 	configfile := filepath.Join(configdir, "config.json")
-
 	b, err := ioutil.ReadFile(configfile)
 	if err != nil {
 		if err.Error() != fmt.Sprintf("open %s: no such file or directory", configfile) {
@@ -105,7 +105,7 @@ func readconfig() *Config {
 		b = DefaultConfig.Marshal() // avoid restart (first boot)
 
 	}
-	// unmarshal
+	// unmarshal with defaults
 	config := new(Config)
 	config.Name = "Cere"
 	config.Owner = user.Username
@@ -124,13 +124,14 @@ func readconfig() *Config {
 // get command from command line arguments
 func getcommand() string {
 	if flag.NArg() == 0 {
-		return "aerth+helper+github"
+		return "!g+\"aerth\"+helper+github"
 	}
-	return url.QueryEscape(strings.Join(flag.Args(), " "))
+	return url.QueryEscape(strings.Join(flag.Args(), " ")) // escape concatenated arguments
 
 }
 
-func (c *Config) RunCommand(cmd string) error {
+// Run a command
+func (c *Config) Run(cmd string) error {
 	link := fmt.Sprintf(c.Resources["ddg"], cmd)
 	log.Println(link)
 	if c.OpenLinks {
@@ -146,6 +147,7 @@ func (c *Config) RunCommand(cmd string) error {
 	return nil
 }
 
+// Marshal into []byte
 func (c *Config) Marshal() []byte {
 	b, err := json.Marshal(c)
 	if err != nil {

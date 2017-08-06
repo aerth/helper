@@ -20,6 +20,19 @@ Contributions welcome. Please run `gofmt -w -l -s .` before your commit, Thanks!
 
 ### Known Issues
 
-With bash, it is recommended you `set +H` to disable `!`-style history expansion.
+With bash, it is **highly recommended** to `set +H` to disable `!`-style history expansion.
+If you actually use bash `!-3` to repeat the third most recent command, just single quote your bangs:
+
+```
+helper '!gh language:go stars:<5'
+```
+
 Other shells don't seem to have this issue.
+
+You can add this to your `.bash_profile` or `.bashrc`:
+
+```
+# disable !-style history expansion for helper bangs (https://github.com/aerth/helper)
+set +H
+```
 
