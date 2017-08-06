@@ -1,5 +1,5 @@
-// Copyright 2017 The Helper Authors. All rights reserved.
-// Use of this source code is governed by an AGPL-style
+// Copyright 2017 aerth. All rights reserved.
+// Use of this source code is governed by a GPL-style
 // license that can be found in the LICENSE file.
 
 // helper command line assistant
@@ -13,7 +13,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"os/exec"
 	osuser "os/user"
 	"strings"
 	"time"
@@ -136,7 +135,12 @@ func (c *Config) RunCommand(cmd string) error {
 	link := fmt.Sprintf(c.Resources["ddg"]+"\n", cmd)
 	log.Println(link)
 	if c.OpenLinks {
-		return browser.OpenURL(link)
+		go func() {
+			if err := browser.OpenURL(link); err != nil {
+				log.Fatal(err)
+
+			}
+		}()
 	}
 	return nil
 }
@@ -147,12 +151,4 @@ func (c *Config) Marshal() []byte {
 		panic(err)
 	}
 	return b
-}
-
-func (c *Config) Open(link string) error {
-	cmd := exec.Command(c.Browser, link)
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	return nil
 }
