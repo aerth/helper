@@ -2,6 +2,26 @@
 
 Command Line Assistant for people who [bang](https://duckduckgo.com/bang)[!](https://duckduckgo.com/lite?q=!g+"aerth"+helper+github)[!](https://duckduckgo.com/bang?c=Tech&sc=Languages+(Go))
 
+### Usage
+
+```
+helper v0.0.3
+https://github.com/aerth/helper
+
+Available Resources:
+         g https://encrypted.google.com/search?q=%s
+         ddg https://duckduckgo.com/lite?q=%s
+
+Available Bookmarks:
+         gonew https://github.com/search?o=desc&q=language%3Ago+stars%3A1&repo=&s=updated&start_value=1&type=Repositories
+         gotrend https://github.com/trending/go
+         news https://news.ycombinator.com/
+         r https://reddit.com/r/golang/
+
+Flags:
+  -x    dont open links, just print them
+```
+
 ### Copyright
 
 Copyright 2017 aerth. All rights reserved.
