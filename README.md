@@ -1,13 +1,10 @@
-# helper
+# [helper](https://github.com/aerth/helper)
 
 Command Line Assistant for people who [bang](https://duckduckgo.com/bang)[!](https://duckduckgo.com/lite?q=!g+"aerth"+helper+github)[!](https://duckduckgo.com/bang?c=Tech&sc=Languages+(Go))
 
 ### Usage
 
 ```
-helper v0.0.3
-https://github.com/aerth/helper
-
 Available Resources:
          g https://encrypted.google.com/search?q=%s
          ddg https://duckduckgo.com/lite?q=%s

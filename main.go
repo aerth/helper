@@ -23,7 +23,7 @@ import (
 )
 
 // helper version
-var version = [3]byte{0, 0, 3}
+var version = [3]byte{0, 0, 4}
 
 const source = "https://github.com/aerth/helper"
 
