@@ -54,7 +54,7 @@ func init() {
 }
 
 // helper version
-var version = [3]byte{0, 0, 1}
+var version = [3]byte{0, 0, 2}
 
 // stringer for version
 func versionString() string {
@@ -134,6 +134,7 @@ func (c *Config) RunCommand(cmd string) error {
 	link := fmt.Sprintf(c.Resources["ddg"], cmd)
 	log.Println(link)
 	if c.OpenLinks {
+		// open in browser
 		go func() {
 			if err := browser.OpenURL(link); err != nil {
 				log.Fatal(err)
