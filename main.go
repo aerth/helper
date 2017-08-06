@@ -63,7 +63,7 @@ func versionString() string {
 
 // parse flags, run command
 func main() {
-	noopenlinks := flag.Bool("-x", false, "dont open links, just print them")
+	noopenlinks := flag.Bool("x", false, "dont open links, just print them")
 	flag.Parse()
 	config := readconfig()
 	if *noopenlinks {
@@ -73,7 +73,6 @@ func main() {
 	if err := config.RunCommand(command); err != nil {
 		log.Fatal(err)
 	}
-	<-time.After(time.Second)
 }
 
 // read config file (~/.config/helper/config.json)
@@ -132,7 +131,7 @@ func getcommand() string {
 }
 
 func (c *Config) RunCommand(cmd string) error {
-	link := fmt.Sprintf(c.Resources["ddg"]+"\n", cmd)
+	link := fmt.Sprintf(c.Resources["ddg"], cmd)
 	log.Println(link)
 	if c.OpenLinks {
 		go func() {
@@ -141,6 +140,7 @@ func (c *Config) RunCommand(cmd string) error {
 
 			}
 		}()
+		<-time.After(time.Millisecond * 500)
 	}
 	return nil
 }
