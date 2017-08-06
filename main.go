@@ -25,10 +25,14 @@ import (
 // helper version
 var version = [3]byte{0, 0, 3}
 
+const source = "https://github.com/aerth/helper"
+
 type Config struct {
 	Name      string // what helper is to be named
 	Owner     string // who helper knows as its owner
 	Resources map[string]string
+	Bookmarks map[string]string
+	commands  map[string]func()
 	Browser   string       // path to browser executable
 	OpenLinks bool         // open links in browser
 	user      *osuser.User // user info
@@ -37,14 +41,36 @@ type Config struct {
 }
 
 var DefaultResources = map[string]string{
-	"google": "https://encrypted.google.com/search?q=%s",
-	"ddg":    "https://duckduckgo.com/lite?q=%s",
+	"g":   "https://encrypted.google.com/search?q=%s",
+	"ddg": "https://duckduckgo.com/lite?q=%s",
+}
+
+var DefaultBookmarks = map[string]string{
+	"gonew":   "https://github.com/search?o=desc&q=language%3Ago+stars%3A1&repo=&s=updated&start_value=1&type=Repositories",
+	"gotrend": "https://github.com/trending/go",
+	"news":    "https://news.ycombinator.com/",
+	"r":       "https://reddit.com/r/golang/",
+}
+
+var DefaultCommands = map[string]func(){
+	"help": func() {
+		fmt.Println("Available Resources:")
+		for k, v := range DefaultResources {
+			fmt.Println("\t", k, v)
+		}
+		fmt.Println("\nAvailable Bookmarks:")
+		for k, v := range DefaultBookmarks {
+			fmt.Println("\t", k, v)
+		}
+	},
 }
 
 var DefaultConfig = &Config{
 	Name:      "Cere",
 	Owner:     "Master",
 	Resources: DefaultResources,
+	commands:  DefaultCommands,
+	Bookmarks: DefaultBookmarks,
 	Browser:   "firefox", // sensible-browser ?
 	OpenLinks: true,
 }
@@ -54,6 +80,14 @@ func init() {
 	log.SetFlags(0)
 	log.SetPrefix("")
 	log.Println(versionString())
+	log.Println(source)
+	flag.Usage = func() {
+		fmt.Println()
+		DefaultCommands["help"]()
+		fmt.Println()
+		fmt.Println("Flags:")
+		flag.PrintDefaults()
+	}
 }
 
 // stringer for version
@@ -69,8 +103,7 @@ func main() {
 	if *noopenlinks {
 		config.OpenLinks = false
 	}
-	command := getcommand()
-	if err := config.Run(command); err != nil {
+	if err := config.getcommand(); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -110,6 +143,8 @@ func readconfig() *Config {
 	config.Name = "Cere"
 	config.Owner = user.Username
 	config.Resources = DefaultResources
+	config.Bookmarks = DefaultBookmarks
+	config.commands = DefaultCommands
 	config.OpenLinks = true
 	config.user = user
 	config.configDir = configdir
@@ -122,28 +157,53 @@ func readconfig() *Config {
 }
 
 // get command from command line arguments
-func getcommand() string {
+func (c *Config) getcommand() error {
+	// no args, open google
 	if flag.NArg() == 0 {
-		return "!g+\"aerth\"+helper+github"
+		return c.OpenLink(fmt.Sprintf(c.Resources["ddg"], "!g+\"aerth\"+helper+github"))
 	}
-	return url.QueryEscape(strings.Join(flag.Args(), " ")) // escape concatenated arguments
+	args := flag.Args()
+
+	// check commands
+	if command, ok := c.commands[args[0]]; ok {
+		command()
+		os.Exit(0)
+	}
+
+	// check bookmarks
+	if link, ok := c.Bookmarks[args[0]]; ok {
+		return c.OpenLink(link)
+	}
+
+	// check resources
+	if len(args) > 1 {
+		if query, ok := c.Resources[args[0]]; ok {
+			return c.OpenLink(fmt.Sprintf(query, url.QueryEscape(strings.Join(args[1:], " "))))
+		}
+	}
+	// default: duck duck go
+	cmd := url.QueryEscape(strings.Join(args, " ")) // escape concatenated arguments
+	link := fmt.Sprintf(c.Resources["ddg"], cmd)
+	return c.OpenLink(link)
 
 }
 
-// Run a command
-func (c *Config) Run(cmd string) error {
-	link := fmt.Sprintf(c.Resources["ddg"], cmd)
-	log.Println(link)
-	if c.OpenLinks {
-		// open in browser
-		go func() {
-			if err := browser.OpenURL(link); err != nil {
-				log.Fatal(err)
-
-			}
-		}()
-		<-time.After(time.Millisecond * 500)
+// OpenLink in browser
+func (c *Config) OpenLink(cmd string) error {
+	log.Println("\n" + cmd + "\n")
+	if !c.OpenLinks {
+		return nil
 	}
+
+	// open in browser
+	go func() {
+		if err := browser.OpenURL(cmd); err != nil {
+			log.Fatal(err)
+
+		}
+	}()
+	<-time.After(time.Millisecond * 500)
+
 	return nil
 }
 

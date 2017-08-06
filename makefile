@@ -10,8 +10,8 @@ install:
 	install helper /usr/local/bin/
 
 package:
-	gox && \
-	for i in $(ls helper_*); do zip $i.zip $i README.md LICENSE main.go makefile; done
+	gox
+	for i in $(ls helper_*); do echo $i; zip $i.zip $i README.md LICENSE main.go makefile; done
 
 clean:
 	rm -vf helper*

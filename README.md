@@ -1,8 +1,6 @@
 # helper
 
-Command Line Assistant
-
-For people who [bang](https://duckduckgo.com/bang)
+Command Line Assistant for people who [bang](https://duckduckgo.com/bang)[!](https://duckduckgo.com/lite?q=!g+"aerth"+helper+github)[!](https://duckduckgo.com/bang?c=Tech&sc=Languages+(Go))
 
 ### Copyright
 
